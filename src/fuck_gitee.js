@@ -93,7 +93,6 @@
         xhr.open("GET", label_url, true);
         xhr.onreadystatechange = function() {
             if (xhr.readyState == 4 && xhr.status == 200) {
-                console.log(xhr.responseText);
                 var label_map = new Object();
                 JSON.parse(xhr.responseText).forEach((label) => {
                     label_map[label.name] = label.id;
@@ -104,9 +103,34 @@
         xhr.send();
     }
 
+    function head_to_repo() {
+
+        document.querySelectorAll("div.popover-reference").forEach((div) => {
+
+            var issue_num = div.textContent.replaceAll(" ", "").replaceAll("\n", "").replaceAll("#", "");
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "https://gitee.com/njderi/dashboard/issues/" + issue_num, true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    var resp = JSON.parse(xhr.responseText);
+                    var repo_path = resp.project.path;
+
+                    var issue_ele = document.createElement("a");
+                    issue_ele.setAttribute("href", repo_path + "/issues/" + issue_num + "?from=project-issue");
+                    issue_ele.setAttribute("class", "issue-number-button");
+                    issue_ele.innerText = ("#" + issue_num);
+
+                    div.parentElement.replaceChild(issue_ele, div);
+                }
+            }
+            xhr.send();
+        })
+    }
     window.onload = function() {
-        fuck_gitee();
+        setTimeout(fuck_gitee, 500);
         setTimeout(add_listener, 1000);
+        setTimeout(head_to_repo, 1000);
         fuck_label();
     }
 
